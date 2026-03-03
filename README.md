@@ -1,10 +1,11 @@
 # SPROUT
 
-SPROUT is a vision foundation model built on a diffusion-style UNet with a DiT backbone and RoPE positional encoding. It supports three downstream tasks through fine-tuning from pretrained weights:
+SPROUT is a multi-crop, multi-task agricultural foundation model trained via diffusion denoising.
 
-- **Semantic Segmentation** — pixel-wise class prediction
-- **Monocular Depth Estimation** — dense depth map regression
-- **Scalar Regression** — image-level numeric prediction (e.g., object counting)
+This repository currently supports three types of downstream tasks:
+- **Semantic Segmentation** 
+- **Monocular Depth Estimation** 
+- **Counting** 
 
 
 
