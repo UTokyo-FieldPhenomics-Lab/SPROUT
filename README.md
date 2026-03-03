@@ -10,27 +10,7 @@ SPROUT is a vision foundation model built on a diffusion-style UNet with a DiT b
 
 ### Dependencies
 
-```
-torch
-pytorch-lightning
-omegaconf
-opencv-python
-numpy
-tqdm
-scikit-learn
-timm
-diffusers
-einops
-scipy
-matplotlib
-safetensors
-```
-
-Install via pip:
-
-```bash
-pip install torch torchvision pytorch-lightning omegaconf opencv-python numpy tqdm scikit-learn timm diffusers einops scipy matplotlib safetensors
-```
+Refer to https://github.com/illrayy/DODA to set up the environment.
 
 ### Pretrained Weights
 
@@ -195,10 +175,3 @@ python visiualize_depth.py
 
 - Place input images in `visualization/depth/input/`.
 - Colorized depth maps (rainbow colormap) are saved to `visualization/depth/output/{model_name}/`.
-
-
-## Key Implementation Details
-
-- **Input normalization**: All images are normalized as `(pixel / 127.5 - 1) * scale` where `scale = 2.0209` for the provided pretrained weights.
-- **Timestep conditioning**: A fixed timestep is used at both training and inference (not a diffusion sampling loop).
-- **Pretrained weight loading**: Only the UNet diffusion model weights (keyed by `model.diffusion_model.*`) are loaded from the checkpoint; task-specific heads are trained from scratch.
