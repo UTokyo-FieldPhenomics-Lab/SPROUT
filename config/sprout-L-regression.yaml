@@ -1,0 +1,19 @@
+model:
+  target: sprout.udit_classification.UNetModel
+  params:
+    image_size: 256
+    in_channels: 3
+    model_channels: 128
+    attention_resolutions: [8, 16]
+    num_res_blocks: [ 1, 2, 2, 4, 4 ]
+    channel_mult: [ 1, 2, 2, 4, 4 ]
+    num_heads: 8
+    use_spatial_transformer: True
+    context_dim: 768
+    transformer_depth: 1
+    use_checkpoint: True
+    resblock_updown: True
+    use_scale_shift_norm: True
+    dit_depth: 12
+    dit_num_heads: 12
+    num_classes: 1
