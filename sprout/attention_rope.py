@@ -6,7 +6,7 @@ from torch import nn, einsum
 from einops import rearrange, repeat
 from typing import Optional, Any
 
-from sprout.utils.utils import checkpoint
+from sprout.utils import checkpoint
 from diffusers.models.embeddings import get_2d_rotary_pos_embed
 
 
