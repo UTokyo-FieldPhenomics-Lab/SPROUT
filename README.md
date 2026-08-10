@@ -2,6 +2,10 @@
 
 SPROUT is a multi-crop, multi-task agricultural foundation model trained via diffusion denoising.
 
+## Pretraining Dataset
+
+The MCD-2.6m pretraining dataset is available on [Hugging Face](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m).
+
 This repository currently supports three types of downstream tasks:
 - **Semantic Segmentation** 
 - **Monocular Depth Estimation** 
