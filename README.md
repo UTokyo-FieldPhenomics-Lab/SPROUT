@@ -1,27 +1,47 @@
 # SPROUT: A Scalable Diffusion Foundation Model for Multi-Crop Plant Phenotyping
 
+Shuai Xiang, James Burridge, Shouyang Liu, Hao Lu, Tokihiro Fukatsu, Yinqiang Zheng, and Wei Guo
+
 **[Paper](https://arxiv.org/abs/2603.27519) | [Pretrained Weights](#pretrained-weights) | [MCD-2.6M Dataset](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m) | [Citation](#citation)**
 
 SPROUT is a vision foundation model for multi-crop plant phenotyping, pretrained on 2.6 million unlabeled open-field images. It supports plant organ segmentation, crop–weed parsing, monocular depth estimation, and yield-organ counting across diverse crops and field conditions.
 
 We publicly release **pretrained SPROUT-S, SPROUT-B, and SPROUT-L models**, **downstream training and inference code**, and **MCD-2.6M**, our multi-crop pretraining dataset, to support research and applications in agricultural vision.
 
-## Pretraining Dataset
+## Applications
 
-The MCD-2.6m pretraining dataset is available on [Hugging Face](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m).
+SPROUT is evaluated on the following image-based plant phenotyping tasks:
 
-This repository currently supports three types of downstream tasks:
-- **Semantic Segmentation** 
-- **Monocular Depth Estimation** 
-- **Counting** 
+| Task | Evaluated crops or settings |
+|---|---|
+| Plant organ segmentation | Apple, peach, pear, grape, wheat, and rice |
+| Crop–weed parsing | Ten crop-field datasets |
+| Monocular depth estimation | Sugar beet |
+| Yield-organ counting | Wheat spikes and soybean pods |
 
+## Selected Results
 
+The following results are reported in the [paper](https://arxiv.org/abs/2603.27519). Each row uses the corresponding task-specific evaluation protocol.
 
-### Dependencies
+| Evaluation | Baseline | SPROUT-L | Metric |
+|---|---|---|---|
+| Wheat organ segmentation | FOMO4Wheat ViT-G: 74.63 | **78.38** | mIoU ↑ |
+| Sugar beet depth estimation | DINOv3-L: 0.0062 | **0.0045** | AbsRel ↓ |
+| Wheat spike counting | CSNet: 3.87 | **3.62** | MAE ↓ |
+
+Wheat organ segmentation uses the 8:2 train/test split aligned with the FOMO4Wheat comparison in the paper. Higher mIoU is better; lower AbsRel and MAE are better. See the paper for the full baseline comparisons and evaluation settings.
+
+## MCD-2.6M Pretraining Dataset
+
+**MCD-2.6M** is the multi-crop image corpus used to pretrain SPROUT. It contains **2,604,450 open-field images** spanning multiple crops, growth stages, sites, and field conditions.
+
+The images and dataset documentation are publicly available on [Hugging Face](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m). See the dataset card for source-specific licensing and attribution requirements.
+
+## Installation
 
 Refer to https://github.com/illrayy/DODA to set up the environment.
 
-### Pretrained Weights
+## Pretrained Weights
 
 Download the pretrained checkpoint and place it under `pretrained_models/`.
 
