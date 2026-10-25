@@ -1,6 +1,10 @@
-# SPROUT
+# SPROUT: A Scalable Diffusion Foundation Model for Multi-Crop Plant Phenotyping
 
-SPROUT is a multi-crop, multi-task agricultural foundation model trained via diffusion denoising.
+**[Paper](https://arxiv.org/abs/2603.27519) | [Pretrained Weights](#pretrained-weights) | [MCD-2.6M Dataset](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m) | [Citation](#citation)**
+
+SPROUT is a vision foundation model for multi-crop plant phenotyping, pretrained on 2.6 million unlabeled open-field images. It supports plant organ segmentation, crop–weed parsing, monocular depth estimation, and yield-organ counting across diverse crops and field conditions.
+
+We publicly release **pretrained SPROUT-S, SPROUT-B, and SPROUT-L models**, **downstream training and inference code**, and **MCD-2.6M**, our multi-crop pretraining dataset, to support research and applications in agricultural vision.
 
 ## Pretraining Dataset
 
@@ -180,3 +184,19 @@ python visiualize_depth.py
 
 - Place input images in `visualization/depth/input/`.
 - Colorized depth maps (rainbow colormap) are saved to `visualization/depth/output/{model_name}/`.
+
+## Citation
+
+If you use SPROUT or MCD-2.6M in your research, please cite:
+
+```bibtex
+@article{xiang2026sprout,
+  title={SPROUT: A Scalable Diffusion Foundation Model for Multi-Crop Plant Phenotyping},
+  author={Xiang, Shuai and Burridge, James and Liu, Shouyang and Lu, Hao and Fukatsu, Tokihiro and Zheng, Yinqiang and Guo, Wei},
+  journal={arXiv preprint arXiv:2603.27519},
+  year={2026},
+  doi={10.48550/arXiv.2603.27519},
+  url={https://arxiv.org/abs/2603.27519}
+}
+```
+
