@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If you use SPROUT or MCD-2.6M, please cite the paper below."
+title: "SPROUT: A Scalable Diffusion Foundation Model for Multi-Crop Plant Phenotyping"
+type: software
+authors:
+  - family-names: Xiang
+    given-names: Shuai
+  - family-names: Burridge
+    given-names: James
+  - family-names: Liu
+    given-names: Shouyang
+  - family-names: Lu
+    given-names: Hao
+  - family-names: Fukatsu
+    given-names: Tokihiro
+  - family-names: Zheng
+    given-names: Yinqiang
+  - family-names: Guo
+    given-names: Wei
+repository-code: "https://github.com/UTokyo-FieldPhenomics-Lab/SPROUT"
+url: "https://arxiv.org/abs/2603.27519"
+preferred-citation:
+  type: article
+  title: "SPROUT: A Scalable Diffusion Foundation Model for Multi-Crop Plant Phenotyping"
+  authors:
+    - family-names: Xiang
+      given-names: Shuai
+    - family-names: Burridge
+      given-names: James
+    - family-names: Liu
+      given-names: Shouyang
+    - family-names: Lu
+      given-names: Hao
+    - family-names: Fukatsu
+      given-names: Tokihiro
+    - family-names: Zheng
+      given-names: Yinqiang
+    - family-names: Guo
+      given-names: Wei
+  journal: "arXiv preprint arXiv:2603.27519"
+  year: 2026
+  doi: "10.48550/arXiv.2603.27519"
+  url: "https://arxiv.org/abs/2603.27519"
