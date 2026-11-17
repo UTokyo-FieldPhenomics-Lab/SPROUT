@@ -2,15 +2,15 @@
 
 Shuai Xiang, James Burridge, Shouyang Liu, Hao Lu, Tokihiro Fukatsu, Yinqiang Zheng, and Wei Guo
 
-**[Paper](https://arxiv.org/abs/2603.27519) | [Pretrained Weights](#pretrained-weights) | [MCD-2.6M Dataset](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m) | [Citation](#citation)**
+**[Paper](https://arxiv.org/abs/2603.27519) | [Pretrained Weights](#pretrained-weights) | [Pretraining](#pretraining-from-unlabeled-images) | [MCD-2.6M Dataset](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m) | [Citation](#citation)**
 
-SPROUT is a vision foundation model for multi-crop plant phenotyping, pretrained on 2.6 million unlabeled open-field images. It supports plant organ segmentation, crop–weed parsing, monocular depth estimation, and yield-organ counting across diverse crops and field conditions.
+SPROUT is a diffusion foundation model for multi-crop plant phenotyping. Pretrained on 2.6 million unlabeled open-field images, it supports plant organ segmentation, crop–weed parsing, monocular depth estimation, and yield-organ counting.
 
-We publicly release **pretrained SPROUT-S, SPROUT-B, and SPROUT-L models**, **downstream training and inference code**, and **MCD-2.6M**, our multi-crop pretraining dataset, to support research and applications in agricultural vision.
+This repository provides **SPROUT-S/B/L checkpoints**, **pretraining code**, and **downstream training and inference code**. The **MCD-2.6M pretraining dataset** is available on [Hugging Face](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m).
 
 ## Applications
 
-SPROUT is evaluated on the following image-based plant phenotyping tasks:
+SPROUT supports four plant phenotyping tasks:
 
 | Task | Evaluated crops or settings |
 |---|---|
@@ -19,21 +19,31 @@ SPROUT is evaluated on the following image-based plant phenotyping tasks:
 | Monocular depth estimation | Sugar beet |
 | Yield-organ counting | Wheat spikes and soybean pods |
 
-The following results are reported in the [paper](https://arxiv.org/abs/2603.27519). Each row uses the corresponding task-specific evaluation protocol.
-
 ## MCD-2.6M Pretraining Dataset
 
-**MCD-2.6M** is the multi-crop image corpus used to pretrain SPROUT. It contains **2,604,450 open-field images** spanning multiple crops, growth stages, sites, and field conditions.
+**MCD-2.6M** contains **2,604,450 open-field images** spanning crops, growth stages, sites, and field conditions. It is the image corpus used to pretrain SPROUT.
 
-The images and dataset documentation are publicly available on [Hugging Face](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m). See the dataset card for source-specific licensing and attribution requirements.
+Download the images from [Hugging Face](https://huggingface.co/datasets/XIANG-Shuai/MCD-2.6m). The dataset card lists the sources, licenses, and attribution requirements.
 
 ## Installation
 
-Refer to https://github.com/illrayy/DODA to set up the environment.
+Use Python 3.8 for pretraining. For CUDA 11.6, install PyTorch and torchvision first:
+
+```bash
+pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
+```
+
+Install the pretraining dependencies:
+
+```bash
+pip install -r requirements-pretraining.txt
+```
+
+For downstream tasks, follow the [DODA environment setup](https://github.com/illrayy/DODA). Run commands from the repository root.
 
 ## Pretrained Weights
 
-Download the pretrained checkpoint and place it under `pretrained_models/`.
+Download a checkpoint and place it in `pretrained_models/`. Choose the matching S/B/L configuration when training a downstream model.
 
 | Model | Params | Iterations | Download |
 |---|---|---|---|
@@ -93,7 +103,7 @@ your_dataset/
     └── test.txt
 ```
 
-Annotation file format (space-separated, one sample per line):
+List each image filename and its numeric target on one line, separated by a space:
 
 ```
 image001.png 42
@@ -101,63 +111,64 @@ image002.png 15
 image003.png 87
 ```
 
-Each line contains the image filename and its corresponding numeric label.
-
 ## Training
 
 ### Pretraining from unlabeled images
 
-Install the pretraining runtime (Python 3.8, PyTorch 1.13.0 and Lightning 1.4.2):
-
-```bash
-pip install -r requirements-pretraining.txt
-```
-
-For CUDA 11.6, install the matching PyTorch wheels first:
-
-```bash
-pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
-```
-
-Prepare a UTF-8 text file with **one RGB image path per line**; annotations are not required. Paths may be absolute or relative to `--data-root`, and may contain spaces. For example:
+Create a UTF-8 text file with one image path per line:
 
 ```text
 wheat/001.png
 maize/002.jpg
 ```
 
-Run from the repository root, using a fresh output directory:
+Paths are absolute or relative to `--data-root`; spaces in filenames are supported. Pretraining uses RGB images without annotations.
+
+Train SPROUT-S with a fresh output directory:
 
 ```bash
 python pretrain.py --config config/sprout-S-pretrain.yaml --image-list datasets/train.txt --data-root datasets/images --output-dir logs/pretrain-S --gpus 1
 ```
 
-Use `sprout-B-pretrain.yaml` or `sprout-L-pretrain.yaml` for the other model sizes. Defaults are 256 × 256 images, batch size 16 **per GPU**. Adjust `training` in the YAML or override `--batch-size`, `--max-steps`, and `--accumulate-grad-batches`. Effective batch size is per-GPU batch size × GPU count × accumulation.
+Choose `sprout-B-pretrain.yaml` or `sprout-L-pretrain.yaml` for the other model sizes. The default input size is 256 × 256, with batch size 16 per GPU. Set training parameters in the YAML, or pass `--batch-size`, `--max-steps`, and `--accumulate-grad-batches`.
 
-For Linux multi-GPU training with FP16, for example:
+Effective batch size = per-GPU batch size × GPU count × accumulation.
+
+For Linux multi-GPU training with FP16:
 
 ```bash
 python pretrain.py --config config/sprout-L-pretrain.yaml --image-list datasets/train.txt --data-root datasets/images --output-dir logs/pretrain-L --gpus 4 --precision 16
 ```
 
-The run directory contains `pretraining.yaml`, `arguments.yaml`, CSV metrics, periodic `SPROUT-step=*.ckpt` files (every 25,000 optimizer steps), and `last.ckpt` at completion. Checkpoints include model weights, EMA, diffusion buffers, `scale_factor`, optimizer, scheduler, and mixed-precision state when applicable. Resume a checkpoint produced by this entry point with the same config and run directory:
+The output directory contains:
+
+| File | Contents |
+|---|---|
+| `pretraining.yaml` / `arguments.yaml` | Model and run settings |
+| `metrics/` | CSV training metrics |
+| `SPROUT-step=*.ckpt` | Checkpoints every 25,000 optimizer steps |
+| `last.ckpt` | Final training checkpoint |
+
+Checkpoints save model weights, EMA, diffusion buffers, the image normalization scale, optimizer, scheduler, and mixed-precision state when enabled.
+
+Resume a run with its original config and output directory:
 
 ```bash
 python pretrain.py --config config/sprout-S-pretrain.yaml --image-list datasets/train.txt --data-root datasets/images --output-dir logs/pretrain-S --resume logs/pretrain-S/last.ckpt --gpus 1
 ```
 
-`--max-steps` is the **total** target, including steps already completed. Lightning 1.4 resumes at an epoch boundary; the exact mid-epoch image order and random augmentations are not restored. Legacy DPS/released weight-only checkpoints are for downstream initialization, not full-state resume through this entry point.
+`--max-steps` sets the total target, including completed steps. Lightning 1.4 resumes at an epoch boundary and starts a new data order. Use checkpoints from `pretrain.py` for full-state resume; use the released pretrained weights to initialize downstream models.
 
-For downstream training, set `weight` to the new checkpoint and choose the matching S/B/L downstream config. The checkpoint preserves the `model.diffusion_model.*` keys used by the existing loaders. Also replace the downstream script's hardcoded `scale = 2.0209` with the value saved by your run:
+To fine-tune your pretrained model, set `weight` to its checkpoint and select the matching S/B/L downstream config. Set the downstream script's `scale` to the value saved in your checkpoint:
 
 ```python
 checkpoint = torch.load("logs/pretrain-S/last.ckpt", map_location="cpu")
 scale = checkpoint["state_dict"]["scale_factor"].item()
 ```
 
-### Downstream training settings
+### Downstream training
 
-The downstream training scripts use hardcoded hyperparameters in their `__main__` block. Before running, open the script and modify the following variables:
+Set the dataset, checkpoint, model configuration, and training parameters in each script's `__main__` block:
 
 | Variable | Description |
 |---|---|
@@ -175,7 +186,7 @@ The downstream training scripts use hardcoded hyperparameters in their `__main__
 
 ### Train Segmentation
 
-Edit `train_segmentation.py` and set your parameters, then run:
+Set `dataset_path`, `num_classes`, `weight`, and `configs` in `train_segmentation.py`, then run:
 
 ```bash
 python train_segmentation.py
@@ -188,7 +199,7 @@ python train_segmentation.py
 
 ### Train Depth Estimation
 
-Edit `train_depth_estimation.py` and set your parameters, then run:
+Set the parameters in `train_depth_estimation.py`, then run:
 
 ```bash
 python train_depth_estimation.py
@@ -200,7 +211,7 @@ python train_depth_estimation.py
 
 ### Train Regression
 
-Edit `train_regression.py` and set your parameters, then run:
+Set the parameters in `train_regression.py`, then run:
 
 ```bash
 python train_regression.py
@@ -215,7 +226,7 @@ python train_regression.py
 
 ### Segmentation (Multi-Scale)
 
-Edit `segmentation_ms_inference.py` to set `dataset_path`, `weight`, `num_classes`, etc., then run:
+Set `dataset_path`, `weight`, `configs`, and `num_classes` in `segmentation_ms_inference.py`, then run:
 
 ```bash
 python segmentation_ms_inference.py
@@ -227,7 +238,7 @@ python segmentation_ms_inference.py
 
 ### Regression
 
-Edit `regression_inference.py` to set `dataset_path`, `weight`, `max_number`, etc., then run:
+Set `dataset_path`, `weight`, `configs`, and `max_number` in `regression_inference.py`, then run:
 
 ```bash
 python regression_inference.py
@@ -238,7 +249,7 @@ python regression_inference.py
 
 ### Depth Visualization
 
-Edit `visiualize_depth.py` to set `weight`, `min_depth`, `max_depth`, etc., then run:
+Set `weight`, `min_depth`, and `max_depth` in `visiualize_depth.py`, then run:
 
 ```bash
 python visiualize_depth.py
@@ -249,7 +260,7 @@ python visiualize_depth.py
 
 ## Citation
 
-If you use SPROUT or MCD-2.6M in your research, please cite:
+Cite SPROUT when using the models, code, or MCD-2.6M dataset:
 
 ```bibtex
 @article{xiang2026sprout,
