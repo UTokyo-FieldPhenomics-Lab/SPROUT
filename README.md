@@ -87,7 +87,65 @@ Each line contains the image filename and its corresponding numeric label.
 
 ## Training
 
-All training scripts use hardcoded hyperparameters in their `__main__` block. Before running, open the script and modify the following variables:
+### Pretraining from unlabeled images
+
+Install the pretraining runtime (Python 3.8, PyTorch 1.13.0 and Lightning 1.4.2):
+
+```bash
+pip install -r requirements-pretraining.txt
+```
+
+For CUDA 11.6, install the matching PyTorch wheels first:
+
+```bash
+pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 --extra-index-url https://download.pytorch.org/whl/cu116
+```
+
+Prepare a UTF-8 text file with **one RGB image path per line**; annotations are not required. Paths may be absolute or relative to `--data-root`, and may contain spaces. For example:
+
+```text
+wheat/001.png
+maize/002.jpg
+```
+
+Run from the repository root, using a fresh output directory:
+
+```bash
+python pretrain.py --config config/sprout-S-pretrain.yaml --image-list datasets/train.txt --data-root datasets/images --output-dir logs/pretrain-S --gpus 1
+```
+
+Use `sprout-B-pretrain.yaml` or `sprout-L-pretrain.yaml` for the other model sizes. Defaults are 256 × 256 images, batch size 16 **per GPU**, AdamW at 3.5e-5 (weight decay 0.01), 10,000 warmup optimizer steps, and 300k/450k/700k optimizer steps for S/B/L. These are runnable defaults adapted from the DPS crop trainer and the released checkpoint iteration counts; they are not a verified recipe for reproducing the released weights. Adjust `training` in the YAML or override `--batch-size`, `--max-steps`, and `--accumulate-grad-batches`. Effective batch size is per-GPU batch size × GPU count × accumulation.
+
+The implementation follows the DPS pixel-space diffusion objective: normalize RGB to [-1, 1], multiply by the inverse standard deviation of the first training batch, sample one of 1,000 timesteps, and predict Gaussian noise with MSE. Betas follow the original square-root-linear schedule from 0.0002 to 0.02. The model computes its own class-token context; no VAE, DINO, text encoder, labels, or additional pretrained model downloads are needed. EMA uses the original adaptive decay capped at 0.9999 and updates after each training batch. Augmentation uses rotation with a contained square crop (probability 0.5), resize, and vertical flip (probability 0.5); the crop implementation is cleaned up from DPS and is not pixel-identical to its original augmentation.
+
+For Linux multi-GPU training with FP16, for example:
+
+```bash
+python pretrain.py --config config/sprout-L-pretrain.yaml --image-list datasets/train.txt --data-root datasets/images --output-dir logs/pretrain-L --gpus 4 --precision 16
+```
+
+Use a smaller batch if GPU memory is insufficient. For a quick smoke run, add `--max-steps 2 --batch-size 1 --num-workers 0`; CPU runs also require `--gpus 0 --precision 32`.
+
+The run directory contains `pretraining.yaml`, `arguments.yaml`, CSV metrics, periodic `SPROUT-step=*.ckpt` files (every 25,000 optimizer steps), and `last.ckpt` at completion. Checkpoints include model weights, EMA, diffusion buffers, `scale_factor`, optimizer, scheduler, and mixed-precision state when applicable. Resume a checkpoint produced by this entry point with the same config and run directory:
+
+```bash
+python pretrain.py --config config/sprout-S-pretrain.yaml --image-list datasets/train.txt --data-root datasets/images --output-dir logs/pretrain-S --resume logs/pretrain-S/last.ckpt --gpus 1
+```
+
+`--max-steps` is the **total** target, including steps already completed. Lightning 1.4 resumes at an epoch boundary; the exact mid-epoch image order and random augmentations are not restored. Legacy DPS/released weight-only checkpoints are for downstream initialization, not full-state resume through this entry point.
+
+For downstream training, set `weight` to the new checkpoint and choose the matching S/B/L downstream config. The checkpoint preserves the `model.diffusion_model.*` keys used by the existing loaders. Also replace the downstream script's hardcoded `scale = 2.0209` with the value saved by your run:
+
+```python
+checkpoint = torch.load("logs/pretrain-S/last.ckpt", map_location="cpu")
+scale = checkpoint["state_dict"]["scale_factor"].item()
+```
+
+Existing downstream loaders select the regular model weights; EMA buffers are retained for training continuity. This release focuses on pretraining and downstream transfer; it does not include diffusion image sampling or generation-quality validation. The original pretraining corpus and full-scale reproduction results are not bundled.
+
+### Downstream training settings
+
+The downstream training scripts use hardcoded hyperparameters in their `__main__` block. Before running, open the script and modify the following variables:
 
 | Variable | Description |
 |---|---|

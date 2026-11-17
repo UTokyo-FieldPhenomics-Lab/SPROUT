@@ -1,0 +1,13 @@
+# Versions used in the working Python 3.8 pretraining environment.
+torch==1.13.0
+torchvision==0.14.0
+timm==0.9.16
+diffusers==0.31.0
+einops==0.3.0
+numpy==1.23.1
+opencv-python==4.10.0.84
+pytorch-lightning==1.4.2
+torchmetrics==0.7.3
+omegaconf==2.1.1
+Pillow==9.4.0
+tqdm==4.65.2
