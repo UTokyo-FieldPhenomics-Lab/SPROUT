@@ -19,17 +19,7 @@ SPROUT is evaluated on the following image-based plant phenotyping tasks:
 | Monocular depth estimation | Sugar beet |
 | Yield-organ counting | Wheat spikes and soybean pods |
 
-## Selected Results
-
 The following results are reported in the [paper](https://arxiv.org/abs/2603.27519). Each row uses the corresponding task-specific evaluation protocol.
-
-| Evaluation | Baseline | SPROUT-L | Metric |
-|---|---|---|---|
-| Wheat organ segmentation | FOMO4Wheat ViT-G: 74.63 | **78.38** | mIoU ↑ |
-| Sugar beet depth estimation | DINOv3-L: 0.0062 | **0.0045** | AbsRel ↓ |
-| Wheat spike counting | CSNet: 3.87 | **3.62** | MAE ↓ |
-
-Wheat organ segmentation uses the 8:2 train/test split aligned with the FOMO4Wheat comparison in the paper. Higher mIoU is better; lower AbsRel and MAE are better. See the paper for the full baseline comparisons and evaluation settings.
 
 ## MCD-2.6M Pretraining Dataset
 
